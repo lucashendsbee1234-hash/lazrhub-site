@@ -328,6 +328,31 @@ async def track_download(asset_id: str):
     await db.assets.update_one({"asset_id": asset_id}, {"$inc": {"downloads": 1}})
     return {"ok": True}
 
+@api.get("/assets/{asset_id}/file")
+async def download_asset_file(asset_id: str):
+    """Force-download the original file with proper Content-Disposition."""
+    asset = await db.assets.find_one({"asset_id": asset_id}, {"_id": 0})
+    if not asset or not asset.get("file_url"):
+        raise HTTPException(status_code=404, detail="File not found")
+    file_url = asset["file_url"]
+    # Strip leading /uploads/ to get the storage filename
+    if file_url.startswith("/uploads/"):
+        filename = file_url[len("/uploads/"):]
+    else:
+        filename = Path(file_url).name
+    filepath = UPLOAD_DIR / filename
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="File missing on disk")
+    download_name = asset.get("original_filename") or asset.get("title") or filename
+    # Increment download counter
+    await db.assets.update_one({"asset_id": asset_id}, {"$inc": {"downloads": 1}})
+    return FileResponse(
+        path=str(filepath),
+        filename=download_name,
+        media_type=asset.get("mime_type") or "application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{download_name}"'},
+    )
+
 # --- Comments ---
 @api.get("/assets/{asset_id}/comments")
 async def list_comments(asset_id: str):

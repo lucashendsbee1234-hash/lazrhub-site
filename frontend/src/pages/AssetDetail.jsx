@@ -34,23 +34,17 @@ export default function AssetDetail() {
 
   const download = async () => {
     if (asset.file_url) {
-      const url = resolveUrl(asset.file_url);
-      // Trigger real download
+      // Use dedicated backend endpoint that forces Content-Disposition: attachment
+      const url = `${process.env.REACT_APP_BACKEND_URL}/api/assets/${asset.asset_id}/file`;
+      // Trigger a real save-to-disk via anchor tag on same-origin dedicated endpoint
       const a = document.createElement("a");
       a.href = url;
       a.download = asset.original_filename || asset.title;
-      a.target = "_blank";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      // Track only after starting
-      try {
-        await api.post(`/assets/${id}/download`);
-        setAsset({ ...asset, downloads: asset.downloads + 1 });
-        toast.success("Download started");
-      } catch (_err) {
-        /* track only */
-      }
+      setAsset({ ...asset, downloads: asset.downloads + 1 });
+      toast.success("Download started");
     } else {
       toast.error("No file available for download");
     }
