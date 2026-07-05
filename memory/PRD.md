@@ -36,3 +36,40 @@ Premium, futuristic creator marketplace ("LazR Hub") with dark space-inspired UI
 ## Next Tasks
 - User feedback → iterate on flows
 - Add Google OAuth + Object Storage if user wants durable storage/social login
+
+## Iteration 2 — Universal File Support + Redesign (2026-02-05)
+
+### Universal File Upload System
+- Backend `POST /api/upload` accepts ANY file type. Returns rich metadata:
+  `url, storage_path, size, size_bytes, filename, original_filename, file_ext, mime_type, file_type`
+- `detect_file_type()` maps extensions → 10 categories: image, video, audio, font, archive, document, code, 3d, design, other
+- `Asset` model expanded: `file_type, file_ext, mime_type, original_filename, file_size_bytes`
+- `GET /api/assets` supports `file_type=` filter; search covers `original_filename`
+
+### Smart Preview (`SmartPreview.jsx`)
+- Image → thumbnail
+- Video → autoplay-muted first-frame + play button
+- Audio → music icon card with animated waveform
+- Font → "Aa Bb" preview
+- Others → colored category icon (code/archive/3d/pdf/document/design)
+- Type badge always overlaid; falls back gracefully when preview image fails to load
+
+### UI Redesign (professional GitHub/Framer/Dribbble style)
+- **Navbar**: sticky, shrinks on scroll, inline search bar with live dropdown (categories + assets), ⌘K hint, notifications bell, profile dropdown, mobile hamburger
+- **Home**: compact 60vh split hero (headline+CTAs / featured asset showcase), file-type quick-chips (sticky), Categories row, Trending/Recent/Creators/Collections sections — content-forward
+- **Explore**: sort tabs inline, file-type filter chips, category chips, 4-5 col responsive grid
+- **AssetCard**: subtle lift + shadow hover, quick actions overlay, no glow spam
+- **Upload**: any-file drag-drop with live SmartPreview + optional custom preview image
+- **AssetDetail**: SmartPreview hero, File Info sidebar (type/ext/size/filename/license/version), real HTTP download
+
+### Deprecated
+- Old fake seed data (Nova/Kai/Luma/Orbit + 12 sample assets) — REMOVED
+- Full-screen hero — replaced with compact 60-70vh split
+- Excess glow on cards — subtle hover only
+
+### Next Tasks (P1)
+- Emergent Object Storage swap-in (durable) — replace local filesystem
+- Emergent Google OAuth alongside JWT
+- Stripe checkout for Pro assets
+- Real notifications collection + follow feed page
+- AI semantic search (embed titles/tags)
