@@ -1,55 +1,54 @@
-import { useEffect } from "react";
-import "@/App.css";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
+import { Toaster } from "sonner";
+import { AuthProvider } from "@/context/AuthContext";
+import CustomCursor from "@/components/CustomCursor";
+import ParticleField from "@/components/ParticleField";
+import LoadingScreen from "@/components/LoadingScreen";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Home from "@/pages/Home";
+import Explore from "@/pages/Explore";
+import AssetDetail from "@/pages/AssetDetail";
+import Upload from "@/pages/Upload";
+import Dashboard from "@/pages/Dashboard";
+import Auth from "@/pages/Auth";
+import CreatorProfile from "@/pages/CreatorProfile";
+import Collections from "@/pages/Collections";
+import Leaderboards from "@/pages/Leaderboards";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
+function App() {
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    helloWorldApi();
+    const t = setTimeout(() => setLoading(false), 1400);
+    return () => clearTimeout(t);
   }, []);
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <div className="App">
+    <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
+        <LoadingScreen show={loading} />
+        <CustomCursor />
+        <ParticleField />
+        <div className="relative z-10 min-h-screen">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/asset/:id" element={<AssetDetail />} />
+            <Route path="/upload" element={<Upload />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/login" element={<Auth mode="login" />} />
+            <Route path="/register" element={<Auth mode="register" />} />
+            <Route path="/creator/:username" element={<CreatorProfile />} />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/leaderboards" element={<Leaderboards />} />
+          </Routes>
+          <Footer />
+        </div>
+        <Toaster theme="dark" position="bottom-right" toastOptions={{ style: { background: "rgba(16,24,39,0.9)", border: "1px solid rgba(0,229,255,0.3)", color: "white", backdropFilter: "blur(12px)" } }} />
       </BrowserRouter>
-    </div>
+    </AuthProvider>
   );
 }
 

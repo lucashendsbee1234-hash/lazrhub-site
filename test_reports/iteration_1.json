@@ -1,0 +1,46 @@
+{
+  "summary": "First-finish smoke test of LazR Hub. Backend: all critical endpoints healthy (root, categories x11, assets w/ creator enrichment, search, leaderboards, collections, auth login/register/me/logout, asset CRUD, favorite, download, comments, upload multipart, users/{username}, follow, dashboard stats). Frontend: Home loads with hero + search + 11 categories + 16 asset cards; category click filters explore correctly (3 wallpapers); admin login (admin@lazrhub.com/admin123) redirects to /dashboard with stats + tabs; asset detail loads with download button; leaderboards has 4 tabs; collections shows New button when authed; creator profile shows follow button. Core flows functional.",
+  "tested_scope": ["backend", "frontend", "auth", "integration"],
+  "passed": [
+    "GET /api/ returns {service:'LazR Hub'}",
+    "GET /api/categories returns 11 categories with counts",
+    "GET /api/assets returns 12 assets with enriched creator (name, username, avatar)",
+    "GET /api/assets?q=wallpaper returns 2 filtered results; sort=likes works",
+    "POST /api/auth/login (admin) returns {user, token} + sets cookie",
+    "POST /api/auth/register creates user and returns cookie",
+    "GET /api/auth/me returns user with cookie",
+    "POST /api/auth/logout clears cookie",
+    "POST /api/assets (authed) creates asset owned by user (uses asset_id key)",
+    "POST /api/assets/{id}/favorite toggles favorited",
+    "POST /api/assets/{id}/download increments and returns ok",
+    "POST /api/assets/{id}/comments with {text} works; GET returns list",
+    "POST /api/upload returns {url:/uploads/..., size, filename}",
+    "GET /api/users/luma returns creator with stats (total_downloads, uploads, etc.)",
+    "POST /api/users/luma/follow returns {following:true}",
+    "GET /api/collections returns list; GET /api/leaderboards/{creators,assets} return sorted lists",
+    "GET /api/dashboard/stats (authed) returns uploads/downloads/likes/views/favorites/followers",
+    "Frontend Home: hero, search-input, 11 categories, 16 asset cards render",
+    "Frontend Explore: /explore?category=wallpapers filters to 3 cards",
+    "Frontend Login: admin credentials redirect to /dashboard; stats + My Uploads visible",
+    "Frontend Asset Detail: opens on asset-card click; asset-download-button present",
+    "Frontend Leaderboards: 4 tabs render",
+    "Frontend Collections: collections-new button visible when authed",
+    "Frontend Creator profile /creator/luma: follow-btn present"
+  ],
+  "failed": [
+    {
+      "area": "Documentation vs implementation (minor testid drift)",
+      "issue": "Task spec listed testids as 'category-glow-forge-1' and 'favorite-btn' on asset detail. Actual code uses 'category-{slug}' (e.g. category-wallpapers) and asset detail uses 'asset-favorite' (not 'favorite-btn' — that id is only on AssetCard). Not a functional bug; just spec inconsistency.",
+      "evidence": "grep in CategoryCard.jsx: data-testid={`category-${cat.slug}`}; AssetDetail.jsx: data-testid=\"asset-favorite\"",
+      "priority": "LOW"
+    }
+  ],
+  "action_items": [
+    "Optional: reconcile data-testid naming in the review spec with actual code (category-{slug}, asset-favorite) so future automated tests target the correct selectors.",
+    "Comment POST body field is 'text' on backend (frontend already sends 'text') — spec mentioned 'content' which would 422. Consider aligning docs.",
+    "Not tested (deferred to full QA): Upload page drag-drop flow end-to-end, Settings profile update, /register full UI flow, Trending marquee visual, sort=trending correctness beyond 200."
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "retest_needed": false,
+  "full_testing_deferred": true
+}
