@@ -170,6 +170,9 @@ body {
 .marquee { animation: marquee 40s linear infinite; }
 .marquee-pause:hover .marquee { animation-play-state: paused; }
 
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
 @keyframes logo-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }

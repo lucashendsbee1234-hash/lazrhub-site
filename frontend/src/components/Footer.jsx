@@ -1,54 +1,66 @@
-import { Twitter, Instagram, Github, Send } from "lucide-react";
+import { Twitter, Instagram, Github, Send, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+
+const FOOTER = [
+  {
+    title: "Product",
+    links: [{ to: "/explore", label: "Explore" }, { to: "/collections", label: "Collections" }, { to: "/leaderboards", label: "Leaderboard" }, { to: "/upload", label: "Upload" }],
+  },
+  {
+    title: "Developers",
+    links: [{ href: "#", label: "API" }, { href: "#", label: "Docs" }, { href: "#", label: "GitHub" }, { href: "#", label: "Status" }],
+  },
+  {
+    title: "Company",
+    links: [{ href: "#", label: "About" }, { href: "#", label: "Blog" }, { href: "#", label: "Support" }, { href: "#", label: "Contact" }],
+  },
+  {
+    title: "Legal",
+    links: [{ href: "#", label: "Privacy" }, { href: "#", label: "Terms" }, { href: "#", label: "Cookie policy" }, { href: "#", label: "Licenses" }],
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="relative mt-32 border-t border-white/5">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 grid md:grid-cols-4 gap-10">
-        <div>
-          <div className="flex items-center gap-3 mb-4">
-            <img src="/lazr-logo.png" alt="LazR Hub" className="w-10 h-10 object-contain drop-shadow-[0_0_14px_rgba(0,229,255,0.5)]" />
-            <span className="font-heading font-black text-lg">LazR<span className="text-[#00E5FF]">Hub</span></span>
+    <footer className="relative mt-16 border-t border-white/[0.06] bg-[#040409]">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-12 grid md:grid-cols-6 gap-8">
+        <div className="md:col-span-2">
+          <div className="flex items-center gap-2.5 mb-4">
+            <img src="/lazr-logo.png" alt="LazR Hub" className="w-8 h-8 object-contain" />
+            <span className="font-heading font-black text-base">LazR<span className="text-[#00E5FF]">Hub</span></span>
           </div>
-          <p className="text-sm text-[#B8C2CC]/80 leading-relaxed">A home for creators to upload and discover amazing digital assets.</p>
-          <div className="flex gap-3 mt-6">
-            {[Twitter, Instagram, Github, Send].map((Icon, i) => (
-              <a key={i} href="#" className="glass w-10 h-10 rounded-full flex items-center justify-center hover:border-[#00E5FF]/50 transition">
-                <Icon size={16} strokeWidth={1.5} className="text-[#B8C2CC]" />
+          <p className="text-sm text-[#B8C2CC]/80 leading-relaxed max-w-sm">
+            The creator hub for every digital file. Upload and discover images, video, audio, fonts, code, 3D models — anything.
+          </p>
+          <div className="flex gap-2 mt-5">
+            {[Twitter, Instagram, Github, Send, MessageCircle].map((Icon, i) => (
+              <a key={i} href="#" className="w-9 h-9 rounded-md bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center transition text-[#B8C2CC] hover:text-white">
+                <Icon size={14} strokeWidth={1.5} />
               </a>
             ))}
           </div>
         </div>
-        <div>
-          <div className="text-xs tracking-[0.2em] uppercase text-[#009DFF] mb-4 font-heading">Explore</div>
-          <ul className="space-y-2 text-sm text-[#B8C2CC]">
-            <li><Link to="/" className="hover:text-white">Home</Link></li>
-            <li><Link to="/explore" className="hover:text-white">Explore</Link></li>
-            <li><Link to="/collections" className="hover:text-white">Collections</Link></li>
-            <li><Link to="/leaderboards" className="hover:text-white">Leaderboards</Link></li>
-          </ul>
-        </div>
-        <div>
-          <div className="text-xs tracking-[0.2em] uppercase text-[#009DFF] mb-4 font-heading">Create</div>
-          <ul className="space-y-2 text-sm text-[#B8C2CC]">
-            <li><Link to="/upload" className="hover:text-white">Upload</Link></li>
-            <li><Link to="/dashboard" className="hover:text-white">Dashboard</Link></li>
-            <li><a className="hover:text-white" href="#">Creator Program</a></li>
-            <li><a className="hover:text-white" href="#">API</a></li>
-          </ul>
-        </div>
-        <div>
-          <div className="text-xs tracking-[0.2em] uppercase text-[#009DFF] mb-4 font-heading">Company</div>
-          <ul className="space-y-2 text-sm text-[#B8C2CC]">
-            <li><a className="hover:text-white" href="#">About</a></li>
-            <li><a className="hover:text-white" href="#">Privacy</a></li>
-            <li><a className="hover:text-white" href="#">Terms</a></li>
-            <li><a className="hover:text-white" href="#">Contact</a></li>
-          </ul>
-        </div>
+        {FOOTER.map((col) => (
+          <div key={col.title}>
+            <div className="text-xs uppercase tracking-widest text-[#B8C2CC]/60 font-medium mb-3">{col.title}</div>
+            <ul className="space-y-2 text-sm">
+              {col.links.map((l) => l.to ? (
+                <li key={l.label}><Link to={l.to} className="text-[#B8C2CC] hover:text-white transition">{l.label}</Link></li>
+              ) : (
+                <li key={l.label}><a href={l.href} className="text-[#B8C2CC] hover:text-white transition">{l.label}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
-      <div className="border-t border-white/5 py-6 text-center text-xs text-[#B8C2CC]/60">
-        © 2026 LazR Hub. Built for creators of the future.
+      <div className="border-t border-white/[0.06] py-5 px-4 md:px-8">
+        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-[#B8C2CC]/60">
+          <div>© 2026 LazR Hub. Built for creators of the future.</div>
+          <div className="flex items-center gap-4">
+            <span>All systems operational</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+          </div>
+        </div>
       </div>
     </footer>
   );

@@ -5,6 +5,7 @@ load_dotenv(ROOT_DIR / '.env')
 
 import os
 import uuid
+import mimetypes
 import bcrypt
 import jwt
 import logging
@@ -17,6 +18,33 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
+
+# --- File Type Detection ---
+FILE_TYPE_MAP = {
+    "image": {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".heif"},
+    "video": {".mp4", ".mov", ".webm", ".avi", ".mkv", ".flv", ".wmv", ".m4v"},
+    "audio": {".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".opus", ".wma"},
+    "font": {".ttf", ".otf", ".woff", ".woff2", ".eot"},
+    "archive": {".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".tgz"},
+    "document": {".pdf", ".docx", ".doc", ".txt", ".md", ".rtf", ".xlsx", ".xls", ".pptx", ".ppt", ".odt", ".ods", ".csv"},
+    "code": {".js", ".ts", ".jsx", ".tsx", ".html", ".css", ".scss", ".sass", ".less", ".json", ".xml", ".yml", ".yaml", ".py", ".java", ".cpp", ".c", ".h", ".cs", ".go", ".rs", ".rb", ".php", ".swift", ".kt", ".sh", ".sql", ".vue", ".svelte", ".dart"},
+    "3d": {".obj", ".fbx", ".blend", ".glb", ".gltf", ".stl", ".dae", ".3ds", ".ply", ".usdz"},
+    "design": {".fig", ".sketch", ".xd", ".psd", ".ai", ".eps", ".indd"},
+}
+
+def detect_file_type(ext: str) -> str:
+    ext = ext.lower()
+    for ftype, exts in FILE_TYPE_MAP.items():
+        if ext in exts:
+            return ftype
+    return "other"
+
+def human_size(size_bytes: int) -> str:
+    for unit in ["B", "KB", "MB", "GB"]:
+        if size_bytes < 1024:
+            return f"{size_bytes:.1f} {unit}" if unit != "B" else f"{int(size_bytes)} B"
+        size_bytes /= 1024
+    return f"{size_bytes:.1f} TB"
 
 # --- Setup ---
 mongo_url = os.environ['MONGO_URL']
@@ -98,6 +126,11 @@ class AssetCreate(BaseModel):
     preview_url: str = ""
     file_url: str = ""
     file_size: str = ""
+    file_size_bytes: int = 0
+    original_filename: str = ""
+    file_ext: str = ""
+    mime_type: str = ""
+    file_type: str = "other"
     version: str = "1.0.0"
     gallery: List[str] = []
 
@@ -215,6 +248,7 @@ async def enrich_asset(a: dict, current_user_id: Optional[str] = None) -> dict:
 async def list_assets(
     q: Optional[str] = None,
     category: Optional[str] = None,
+    file_type: Optional[str] = None,
     sort: str = "new",
     limit: int = 60,
     creator_id: Optional[str] = None,
@@ -223,6 +257,8 @@ async def list_assets(
     query = {}
     if category and category != "all":
         query["category"] = category
+    if file_type and file_type != "all":
+        query["file_type"] = file_type
     if creator_id:
         query["creator_id"] = creator_id
     if q:
@@ -231,6 +267,7 @@ async def list_assets(
             {"description": {"$regex": q, "$options": "i"}},
             {"tags": {"$regex": q, "$options": "i"}},
             {"category": {"$regex": q, "$options": "i"}},
+            {"original_filename": {"$regex": q, "$options": "i"}},
         ]
     sort_map = {
         "new": [("created_at", -1)],
@@ -318,19 +355,26 @@ async def add_comment(asset_id: str, data: CommentIn, user: dict = Depends(get_c
 # --- Upload ---
 @api.post("/upload")
 async def upload_file(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
-    ext = Path(file.filename).suffix
+    original_filename = file.filename or "file"
+    ext = Path(original_filename).suffix.lower()
     filename = f"{uuid.uuid4().hex}{ext}"
     filepath = UPLOAD_DIR / filename
     with filepath.open("wb") as f:
         shutil.copyfileobj(file.file, f)
     size_bytes = filepath.stat().st_size
-    if size_bytes < 1024:
-        size_str = f"{size_bytes} B"
-    elif size_bytes < 1024 * 1024:
-        size_str = f"{size_bytes / 1024:.1f} KB"
-    else:
-        size_str = f"{size_bytes / (1024*1024):.1f} MB"
-    return {"url": f"/uploads/{filename}", "size": size_str, "filename": file.filename}
+    mime_type = file.content_type or mimetypes.guess_type(original_filename)[0] or "application/octet-stream"
+    file_type = detect_file_type(ext)
+    return {
+        "url": f"/uploads/{filename}",
+        "storage_path": f"uploads/{filename}",
+        "size": human_size(size_bytes),
+        "size_bytes": size_bytes,
+        "filename": filename,
+        "original_filename": original_filename,
+        "file_ext": ext,
+        "mime_type": mime_type,
+        "file_type": file_type,
+    }
 
 # --- Users / Creators ---
 @api.get("/users/{username}")

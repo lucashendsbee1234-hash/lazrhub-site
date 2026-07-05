@@ -1,0 +1,35 @@
+{
+  "summary": "2nd iteration smoke test of universal-file-type upgrade + UI redesign. Backend: /api/upload correctly detects file_type across .py(code), .txt(document), .png(image), .mp3(audio), .zip(archive), .ttf(font), .pdf(document) — all return {url,storage_path,size,size_bytes,filename,original_filename,file_ext,mime_type,file_type}. POST /api/assets accepts new fields (file_type/file_ext/mime_type/original_filename/file_size_bytes) and echoes them back. GET /api/assets?file_type=code correctly filters to 1 code asset (created Test Code). GET /api/assets?q=test.py matches by original_filename. Legacy endpoints (categories=11, leaderboards, download-track) still work. Frontend: sticky navbar with inline nav-search-input + ⌘K badge, upload btn, profile dropdown (nav-dashboard/nav-logout) all present. Home: compact hero + featured preview + filetype quick chips (All/Images/Video/Audio/Fonts/3D/Code/Docs/Archives/Design) + asset cards render. Explore: H1 + sort tabs + 10 filetype chips + category chips + grid; ?file_type=code correctly shows only Test Code. Upload page: drop zone accepts .py, SmartPreview shows Code icon + green 'Code' badge + 'test.py' pill, title auto-populates. AssetDetail /asset/asset_a7689fa850c2 shows SmartPreview code icon and File Info sidebar (File type=Code, Extension=.py, Filename=test.py, License=Free, Version=1.0.0) with working asset-download-button. Static /uploads/*.py serves with 200. Search dropdown returns live results while typing. Admin login (admin@lazrhub.com/admin123) → /dashboard OK.",
+  "tested_scope": ["backend", "frontend", "auth", "integration"],
+  "passed": [
+    "POST /api/upload .py → file_type=code, ext=.py",
+    "POST /api/upload .txt → file_type=document",
+    "POST /api/upload .png → file_type=image, mime=image/png",
+    "POST /api/upload .mp3 → file_type=audio",
+    "POST /api/upload .zip → file_type=archive",
+    "POST /api/upload .ttf → file_type=font",
+    "POST /api/upload .pdf → file_type=document",
+    "POST /api/assets stores file_type/file_ext/mime_type/original_filename/file_size_bytes and returns them",
+    "GET /api/assets?file_type=code returns only code assets (1)",
+    "GET /api/assets?q=test.py searches by original_filename (match)",
+    "GET /api/categories returns 11 categories",
+    "GET /api/leaderboards/creators returns 2",
+    "POST /api/assets/{id}/download increments (ok:true)",
+    "Static /uploads/{filename}.py serves HTTP 200",
+    "Frontend Home renders navbar (search + ⌘K + upload), compact hero, filetype chips row, asset cards",
+    "Nav search input shows live dropdown with results when typing",
+    "Filetype chip click (filetype-image) works on Home",
+    "Admin login redirects to /dashboard; profile dropdown reveals nav-dashboard + nav-logout",
+    "Upload page: drop zone accepts .py; SmartPreview shows Code icon + badge; title auto-populates from filename",
+    "Explore page shows sort tabs + 10 filetype chips + category chips + grid",
+    "Explore?file_type=code filters to 1 code card (Test Code)",
+    "AssetDetail SmartPreview + file info sidebar (type, ext, filename, license, version) + download button all present"
+  ],
+  "failed": [],
+  "action_items": [
+    "Minor: Home page uses `type-filter-{key}` in spec while chips also expose `filetype-{key}` on Explore — both work. Just noting the two ids co-exist."
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "retest_needed": false,
+  "full_testing_deferred": true
+}
