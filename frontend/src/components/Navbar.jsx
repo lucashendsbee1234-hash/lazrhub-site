@@ -1,27 +1,40 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Upload, LayoutDashboard, LogOut, User } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <motion.nav
       initial={{ y: -30, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="fixed top-0 left-0 right-0 z-50 glass-strong"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? "glass-strong shadow-[0_4px_30px_rgba(0,0,0,0.5)]" : "bg-[#050510]/40 backdrop-blur-md"
+      }`}
+      style={{ paddingTop: scrolled ? 6 : 12, paddingBottom: scrolled ? 6 : 12 }}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 py-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12">
         <Link to="/" className="flex items-center gap-3" data-testid="nav-logo">
-          <div className="relative w-8 h-8 logo-spin">
-            <div className="absolute inset-0 rounded-full border-2 border-[#00E5FF] shadow-[0_0_16px_rgba(0,229,255,0.7)]" />
-            <div className="absolute inset-1 rounded-full border border-[#7C3AED]" />
-            <div className="absolute inset-3 rounded-full bg-[#00E5FF]" />
-          </div>
-          <span className="font-heading font-black tracking-tight text-lg">LazR<span className="text-[#00E5FF]">Hub</span></span>
+          <img
+            src="/lazr-logo.png"
+            alt="LazR Hub"
+            className={`transition-all duration-500 drop-shadow-[0_0_14px_rgba(0,229,255,0.5)] ${scrolled ? "w-8 h-8" : "w-10 h-10"}`}
+          />
+          <span className={`font-heading font-black tracking-tight transition-all duration-500 ${scrolled ? "text-sm" : "text-lg"}`}>
+            LazR<span className="text-[#00E5FF]">Hub</span>
+          </span>
         </Link>
         <div className="hidden md:flex items-center gap-8 text-sm text-[#B8C2CC]">
           <Link to="/explore" className="hover:text-white transition" data-testid="nav-explore">Explore</Link>

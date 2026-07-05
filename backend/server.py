@@ -492,27 +492,12 @@ async def seed_data():
             "created_at": now_utc(),
         })
 
-    demo_creators = [
-        ("nova", "Nova Fields", "3D artist crafting neon dreams", "https://images.unsplash.com/photo-1634910440823-193b061d28a5?w=200&h=200&fit=crop"),
-        ("kai", "Kai Neon", "Cyberpunk UI designer", "https://images.unsplash.com/photo-1580428180098-24b353d7e9d9?w=200&h=200&fit=crop"),
-        ("luma", "Luma Sky", "Wallpaper wizard", "https://images.unsplash.com/photo-1559828801-04565cd31e27?w=200&h=200&fit=crop"),
-        ("orbit", "Orbit Studio", "Sound designer & animator", "https://images.unsplash.com/photo-1530651788726-1dbf58eeef1f?w=200&h=200&fit=crop"),
-    ]
-    for username, name, bio, avatar in demo_creators:
-        if not await db.users.find_one({"username": username}):
-            await db.users.insert_one({
-                "user_id": f"user_{username}0000000",
-                "email": f"{username}@lazrhub.com",
-                "name": name, "username": username,
-                "password_hash": hash_pw("demo123"),
-                "avatar": avatar, "banner": "",
-                "bio": bio, "verified": True,
-                "followers": [], "following": [],
-                "twitter": username, "instagram": username, "website": "",
-                "created_at": now_utc(),
-            })
+    # NO demo creators or seed assets — real data only.
+    # Purge legacy seed data if present from earlier runs.
+    await db.users.delete_many({"user_id": {"$regex": "^user_(nova|kai|luma|orbit)"}})
+    await db.assets.delete_many({"asset_id": {"$regex": "^asset_seed"}})
 
-    if await db.assets.count_documents({}) < 8:
+    if False:
         images = [
             "https://images.unsplash.com/photo-1687894986595-da703eb96375?w=800",
             "https://images.unsplash.com/photo-1718561193320-3e8638a838da?w=800",
@@ -562,12 +547,6 @@ async def seed_data():
 - Password: admin123
 - Username: admin
 - Role: admin
-
-## Demo Creators (all password: demo123)
-- nova@lazrhub.com / demo123 (username: nova)
-- kai@lazrhub.com / demo123 (username: kai)
-- luma@lazrhub.com / demo123 (username: luma)
-- orbit@lazrhub.com / demo123 (username: orbit)
 
 ## Auth Endpoints
 - POST /api/auth/register  { email, password, name, username? }

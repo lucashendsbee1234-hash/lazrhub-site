@@ -154,6 +154,9 @@ body {
         opacity: 0.5;
         pointer-events: none;
     }
+    img {
+        image-rendering: -webkit-optimize-contrast;
+    }
     a, button, [role="button"], input, textarea, select { cursor: none; }
     @media (max-width: 768px) {
         a, button, [role="button"], input, textarea, select { cursor: auto; }

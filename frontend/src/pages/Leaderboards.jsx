@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Trophy, Flame, Download, Heart } from "lucide-react";
+import { Trophy, Flame, Download, Heart, Users } from "lucide-react";
 import { api, fmtNum, resolveUrl } from "../lib/api";
+import EmptyState from "../components/EmptyState";
 
 const TABS = [
   { k: "creators-downloads", label: "Top Creators", Icon: Trophy },
@@ -46,7 +47,14 @@ export default function Leaderboards() {
       </div>
 
       <div className="space-y-3">
-        {data.map((item, i) => (
+        {data.length === 0 ? (
+          <EmptyState
+            icon={tab.startsWith("creators") ? Users : Trophy}
+            title={tab.startsWith("creators") ? "No creators yet." : "No assets yet."}
+            subtitle={tab.startsWith("creators") ? "Be the first to join LazR Hub." : "Be the first to upload an asset and top the charts."}
+            action={<Link to={tab.startsWith("creators") ? "/register" : "/upload"} className="btn-primary mt-4">{tab.startsWith("creators") ? "Create account" : "Upload now"}</Link>}
+          />
+        ) : data.map((item, i) => (
           <div key={item.user_id || item.asset_id} className="card-lazr p-4 flex items-center gap-4">
             <div className={`font-heading font-black text-2xl w-10 text-center ${
               i === 0 ? "text-[#00E5FF]" : i === 1 ? "text-[#009DFF]" : i === 2 ? "text-[#7C3AED]" : "text-[#B8C2CC]/50"

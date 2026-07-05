@@ -30,9 +30,7 @@ export default function Auth({ mode = "login" }) {
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md relative z-10">
         <div className="glass-strong rounded-3xl p-8">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-full border-2 border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.6)] logo-spin flex items-center justify-center">
-              <Sparkles size={16} className="text-[#00E5FF]" />
-            </div>
+            <img src="/lazr-logo.png" alt="LazR Hub" className="w-12 h-12 object-contain drop-shadow-[0_0_16px_rgba(0,229,255,0.6)]" />
             <div>
               <div className="font-heading font-black text-lg">LazR<span className="text-[#00E5FF]">Hub</span></div>
               <div className="text-[10px] tracking-[0.3em] uppercase text-[#B8C2CC]/70">{mode === "login" ? "Welcome Back" : "Join the future"}</div>
@@ -60,7 +58,7 @@ export default function Auth({ mode = "login" }) {
           </div>
           {mode === "login" && (
             <div className="mt-4 text-center text-xs text-[#B8C2CC]/60">
-              Try demo: admin@lazrhub.com / admin123
+              New to LazR Hub? Create an account to upload and follow creators.
             </div>
           )}
         </div>

@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 grid md:grid-cols-4 gap-10">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full border-2 border-[#00E5FF] shadow-[0_0_14px_rgba(0,229,255,0.6)] logo-spin" />
+            <img src="/lazr-logo.png" alt="LazR Hub" className="w-10 h-10 object-contain drop-shadow-[0_0_14px_rgba(0,229,255,0.5)]" />
             <span className="font-heading font-black text-lg">LazR<span className="text-[#00E5FF]">Hub</span></span>
           </div>
           <p className="text-sm text-[#B8C2CC]/80 leading-relaxed">A home for creators to upload and discover amazing digital assets.</p>

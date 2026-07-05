@@ -107,7 +107,7 @@ export default function AssetDetail() {
                   </div>
                 </div>
               ))}
-              {comments.length === 0 && <div className="text-sm text-[#B8C2CC]/60">Be the first to comment.</div>}
+              {comments.length === 0 && <div className="text-sm text-[#B8C2CC]/60 text-center py-6 glass rounded-xl">No comments yet. Start the conversation.</div>}
             </div>
           </div>
         </div>

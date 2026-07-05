@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Search, Filter } from "lucide-react";
+import { useSearchParams, Link } from "react-router-dom";
+import { Search, Filter, Package, Upload } from "lucide-react";
 import { api } from "../lib/api";
 import AssetCard from "../components/AssetCard";
+import EmptyState from "../components/EmptyState";
 
 const SORTS = [
   { k: "new", label: "Newest" },
@@ -22,10 +23,12 @@ export default function Explore() {
   useEffect(() => { api.get("/categories").then((r) => setCats(r.data)); }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      api.get("/assets", { params: { q: q || undefined, category, sort, limit: 60 } }).then((r) => setAssets(r.data));
-    }, 250);
-    return () => clearTimeout(t);
+    const load = () => api.get("/assets", { params: { q: q || undefined, category, sort, limit: 60 } }).then((r) => setAssets(r.data));
+    const t = setTimeout(load, 250);
+    const poll = setInterval(load, 8000);
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    return () => { clearTimeout(t); clearInterval(poll); window.removeEventListener("focus", onFocus); };
   }, [q, category, sort]);
 
   const setParam = (k, v) => {
@@ -73,7 +76,12 @@ export default function Explore() {
       </div>
 
       {assets.length === 0 ? (
-        <div className="text-center py-20 text-[#B8C2CC]/60">No assets found. Try another search.</div>
+        <EmptyState
+          icon={Package}
+          title={q ? "No assets found." : "Nothing has been uploaded yet."}
+          subtitle={q ? "Try searching something different." : "Be the first creator to upload an asset!"}
+          action={!q ? <Link to="/upload" className="btn-primary mt-4"><Upload size={14} /> Upload Your First Asset</Link> : null}
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {assets.map((a, i) => <AssetCard key={a.asset_id} asset={a} index={i} onFavorite={toggleFav} />)}

@@ -3,6 +3,7 @@ import { Plus, FolderKanban } from "lucide-react";
 import { api, resolveUrl } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
+import EmptyState from "../components/EmptyState";
 
 export default function Collections() {
   const { user } = useAuth();
@@ -10,7 +11,8 @@ export default function Collections() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: "", description: "", cover_image: "" });
 
-  useEffect(() => { api.get("/collections").then((r) => setCols(r.data)); }, []);
+  const load = () => api.get("/collections").then((r) => setCols(r.data));
+  useEffect(() => { load(); const t = setInterval(load, 8000); return () => clearInterval(t); }, []);
 
   const create = async (e) => {
     e.preventDefault();
@@ -21,14 +23,6 @@ export default function Collections() {
     setForm({ name: "", description: "", cover_image: "" });
     toast.success("Collection created");
   };
-
-  const DEFAULTS = [
-    { name: "Minimal Wallpapers", cover: "https://images.unsplash.com/photo-1687894986595-da703eb96375?w=800" },
-    { name: "Cyberpunk Icons", cover: "https://images.unsplash.com/photo-1718561193320-3e8638a838da?w=800" },
-    { name: "Best Fonts", cover: "https://images.unsplash.com/photo-1635614017406-7c192d832072?w=800" },
-    { name: "Gaming UI", cover: "https://images.unsplash.com/photo-1766342088246-5328f16fe9d0?w=800" },
-    { name: "Space Themes", cover: "https://images.unsplash.com/photo-1704426882813-8acfff020487?w=800" },
-  ];
 
   return (
     <div className="pt-32 pb-20 px-6 md:px-12 max-w-7xl mx-auto min-h-screen">
@@ -52,11 +46,22 @@ export default function Collections() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...cols, ...DEFAULTS.map((d, i) => ({ collection_id: `d${i}`, name: d.name, cover_image: d.cover, asset_ids: [] }))].map((c, i) => (
+        {cols.length === 0 ? (
+          <div className="col-span-full">
+            <EmptyState
+              icon={FolderKanban}
+              title="No collections have been created yet."
+              subtitle={user ? "Start your first curated collection." : "Sign in to create the first collection."}
+              action={user ? (
+                <button onClick={() => setShowCreate(true)} className="btn-primary mt-4"><Plus size={14} /> New Collection</button>
+              ) : null}
+            />
+          </div>
+        ) : cols.map((c) => (
           <div key={c.collection_id} className="card-lazr overflow-hidden group cursor-hover">
             <div className="aspect-[16/9] relative overflow-hidden">
               {c.cover_image ? (
-                <img src={resolveUrl(c.cover_image)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+                <img src={resolveUrl(c.cover_image)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" loading="lazy" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-[#00E5FF]/20 to-[#7C3AED]/30 flex items-center justify-center">
                   <FolderKanban size={40} strokeWidth={1} className="text-[#00E5FF]" />
